@@ -3,6 +3,7 @@ import { videoDirectory } from "./media.js";
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const recordings = new Map();
 let active;
+let nativeFullscreen;
 
 const observer = new IntersectionObserver(entries => {
   for (const entry of entries) {
@@ -12,7 +13,7 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: [0, .15, .3, .45, .6, .75, .9, 1] });
 
 function chooseRecording() {
-  if (document.fullscreenElement || active?.figure.classList.contains("expanded")) return;
+  if (document.fullscreenElement || nativeFullscreen || active?.figure.classList.contains("expanded")) return;
   let next;
   if (!document.hidden) {
     for (const player of recordings.values()) {
@@ -76,6 +77,8 @@ export function addRecording(figure, project) {
   const fullscreen = controls.querySelector(".fullscreen");
   const covered = [];
   let focusOnLoad = false;
+  const touchScreen = matchMedia("(any-pointer: coarse)");
+  let landscapeLocked = false;
 
   const player = {
     figure, video, visibility: 0, failed: false, userPaused: false,
@@ -187,6 +190,17 @@ export function addRecording(figure, project) {
   });
   video.addEventListener("click", () => play.click());
   seek.addEventListener("input", () => { video.currentTime = Number(seek.value); });
+  async function requestLandscape() {
+    if (!touchScreen.matches || !screen.orientation?.lock) return;
+    try {
+      await screen.orientation.lock("landscape");
+      if (document.fullscreenElement === figure) landscapeLocked = true;
+      else screen.orientation.unlock?.();
+    } catch {
+      // Some mobile browsers leave orientation to the device.
+    }
+  }
+
   fullscreen.addEventListener("click", async () => {
     if (figure.classList.contains("expanded")) {
       collapse();
@@ -199,12 +213,30 @@ export function addRecording(figure, project) {
     if (figure.requestFullscreen && document.fullscreenEnabled) {
       try {
         await figure.requestFullscreen();
+        await requestLandscape();
         return;
       } catch {
         // Use the expanded player when the browser blocks fullscreen.
       }
     }
+    if (touchScreen.matches && typeof video.webkitEnterFullscreen === "function") {
+      try {
+        video.webkitEnterFullscreen();
+        return;
+      } catch {
+        // Native video fullscreen is unavailable for this video.
+      }
+    }
     expand();
+  });
+
+  video.addEventListener("webkitbeginfullscreen", () => {
+    nativeFullscreen = video;
+  });
+  video.addEventListener("webkitendfullscreen", () => {
+    if (nativeFullscreen === video) nativeFullscreen = undefined;
+    fullscreen.focus({ preventScroll: true });
+    chooseRecording();
   });
   figure.addEventListener("keydown", event => {
     if (!figure.classList.contains("expanded")) return;
@@ -224,6 +256,10 @@ export function addRecording(figure, project) {
   document.addEventListener("fullscreenchange", () => {
     if (figure.classList.contains("expanded")) return;
     fullscreen.textContent = document.fullscreenElement === figure ? "Exit full screen" : "Full screen";
+    if (document.fullscreenElement !== figure && landscapeLocked) {
+      screen.orientation.unlock?.();
+      landscapeLocked = false;
+    }
     if (!document.fullscreenElement) chooseRecording();
   });
 

@@ -58,9 +58,7 @@ projects.filter(project => project.published !== false).forEach((project, index)
     <div class="case-body">
       <figure class="recording"></figure>
       <div class="case-note">
-        <p class="summary"></p>
-        <p><span class="label">What I built</span><span class="contribution"></span></p>
-        <p class="case-watch"><span class="label">In the recording</span><span class="watch"></span></p>
+        <div class="case-copy"></div>
         <a class="action" target="_blank" rel="noopener">Original article <span aria-hidden="true">↗</span></a>
       </div>
     </div>`;
@@ -69,9 +67,12 @@ projects.filter(project => project.published !== false).forEach((project, index)
   const title = card.querySelector("h3");
   title.id = project.id + "-title";
   title.textContent = project.title;
-  card.querySelector(".summary").textContent = project.summary;
-  card.querySelector(".contribution").textContent = project.contribution;
-  card.querySelector(".watch").textContent = project.watch;
+  const copy = card.querySelector(".case-copy");
+  for (const paragraph of project.paragraphs) {
+    const text = document.createElement("p");
+    text.textContent = paragraph;
+    copy.append(text);
+  }
   card.querySelector(".action").href = project.url;
   addRecording(card.querySelector("figure"), project);
   if (project.capture?.desktop || project.capture?.mobile) addCapture(card.querySelector(".case-body"), project.capture);
