@@ -1,0 +1,115 @@
+.pdf-viewer {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #7e8a81;
+  background: #d7ddcf;
+  box-shadow: 2px 3px #53686a21;
+}
+.pdf-head, .pdf-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 7px 9px;
+}
+.pdf-head { border-bottom: 1px solid #89968a; }
+.pdf-footer { border-top: 1px solid #89968a; }
+.pdf-label { display: grid; gap: 1px; padding-inline: 4px; }
+.pdf-label small { color: var(--muted); font-size: 11px; }
+.pdf-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.pdf-control {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 4px 7px;
+  border: 1px solid #889486;
+  border-radius: 2px;
+  background: #eef0e4;
+  box-shadow: inset 0 1px #fffaf0;
+  font: 700 10px/1.3 var(--mono);
+}
+.pdf-control:hover:enabled { background: #f8f4e9; border-color: var(--blue); }
+.pdf-control[aria-pressed="true"] { color: #f5f4e7; background: var(--blue); border-color: #284452; box-shadow: inset 0 1px #ffffff2e; }
+.pdf-control:disabled { color: #626c65; background: #d7ddd1; box-shadow: none; cursor: default; }
+.pdf-status {
+  min-width: 74px;
+  color: var(--ink);
+  text-align: center;
+  font: 700 11px/1.4 var(--mono);
+}
+.pdf-surface {
+  min-width: 0;
+  max-height: min(68vh, 590px);
+  overflow: auto;
+  display: grid;
+  justify-items: start;
+  padding: 10px;
+  scrollbar-gutter: stable both-edges;
+  scrollbar-color: #78908a #1a2b31;
+  background-color: #182b31;
+  background-image:
+    repeating-linear-gradient(0deg, #adc5b713 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, #adc5b713 0 1px, transparent 1px 20px);
+}
+.pdf-paper {
+  position: relative;
+  min-width: 0;
+  width: max-content;
+  margin-inline: auto;
+  box-shadow: 0 3px 14px #060f14a6;
+}
+.pdf-paper canvas { display: block; background: #fff; }
+.pdf-surface:focus-visible { outline-offset: -4px; outline-color: #b9d7c7; }
+.pdf-surface [hidden], .pdf-footer [hidden] { display: none; }
+.pdf-message {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+  max-width: 38ch;
+  padding: 24px 9px;
+  text-align: center;
+  color: #eef3e5;
+  font: 12px/1.6 var(--mono);
+}
+.pdf-surface[data-state="loading"] { min-height: clamp(185px, 32vw, 332px); }
+.pdf-surface[data-state="error"] { min-height: 155px; }
+.pdf-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 6px;
+  color: var(--blue);
+  font: 700 10px/1.4 var(--mono);
+}
+.pdf-full:hover { text-decoration: underline; text-underline-offset: 3px; }
+.textLayer {
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+  color-scheme: only light;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+}
+.textLayer :is(span, br) { position: absolute; color: transparent; white-space: pre; cursor: text; transform-origin: 0 0; }
+.textLayer > :not(.markedContent), .textLayer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent { display: contents; }
+.textLayer ::selection { background: #78a3df75; }
+@media (max-width: 440px) {
+  .pdf-head, .pdf-footer { padding: 6px; }
+  .pdf-surface { padding: 7px; }
+  .pdf-control { padding-inline: 5px; }
+  .pdf-status { min-width: 62px; font-size: 10px; }
+}
