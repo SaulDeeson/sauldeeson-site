@@ -4,6 +4,7 @@ import { addWorkflows } from "./workflows.js";
 
 const projectIndex = document.querySelector("#project-index");
 const projectList = document.querySelector("#project-list");
+const workflow = document.querySelector("#workflow");
 const cards = [];
 const links = new Map();
 
@@ -50,19 +51,34 @@ projects.filter(project => project.published !== false).forEach((project, index)
   card.id = project.id;
   card.className = "surface case-card";
   card.setAttribute("aria-labelledby", project.id + "-title");
+  const cornerCallout = index === 0 ? `
+        <span class="case-radius spec-label" aria-hidden="true">R 4 px
+          <svg width="32" height="19" viewBox="0 0 32 19" focusable="false">
+            <path d="M.5 14.5H14L30.5 1M24.5 2.2l6-1.2-2 5.75"/>
+          </svg>
+        </span>` : "";
+  const heightCallout = index === 1 ? `
+        <span id="frame-height" class="work-measure work-measure-height spec-label" hidden aria-hidden="true"><span></span></span>` : "";
+  const typeCallout = index === 2 ? `
+      <span class="case-type spec-label" hidden aria-hidden="true"></span>` : "";
   card.innerHTML = `
+    <div class="case-datum spec-label" aria-hidden="true"><i class="register"></i><span></span><i class="register"></i></div>
     <header class="case-header">
       <span class="case-count" aria-hidden="true"></span>
-      <div><p class="label category"></p><h3></h3></div>
+      <div><p class="label category"></p><h3></h3></div>${typeCallout}
     </header>
     <div class="case-body">
-      <figure class="recording"></figure>
+      <div class="case-media">
+        <div class="media-stamp spec-label"><span>Project recording</span><span class="media-size"></span></div>
+        <figure class="recording"></figure>${cornerCallout}${heightCallout}
+      </div>
       <div class="case-note">
         <div class="case-copy"></div>
         <a class="action" target="_blank" rel="noopener">Original article <span aria-hidden="true">↗</span></a>
       </div>
     </div>`;
   card.querySelector(".case-count").textContent = number;
+  card.querySelector(".case-datum span").textContent = "Case / " + number;
   card.querySelector(".category").textContent = project.category;
   const title = card.querySelector("h3");
   title.id = project.id + "-title";
@@ -74,7 +90,15 @@ projects.filter(project => project.published !== false).forEach((project, index)
     copy.append(text);
   }
   card.querySelector(".action").href = project.url;
-  addRecording(card.querySelector("figure"), project);
+  const recording = card.querySelector("figure");
+  addRecording(recording, project);
+  const video = recording.querySelector("video");
+  const mediaSize = card.querySelector(".media-size");
+  video.addEventListener("loadedmetadata", () => {
+    if (video.videoWidth && video.videoHeight) {
+      mediaSize.textContent = video.videoWidth + " × " + video.videoHeight + " px";
+    }
+  });
   if (project.capture?.desktop || project.capture?.mobile) addCapture(card.querySelector(".case-body"), project.capture);
   projectList.append(card);
   cards.push(card);
@@ -103,4 +127,44 @@ window.addEventListener("scroll", queueIndexUpdate, { passive: true });
 window.addEventListener("resize", queueIndexUpdate);
 queueIndexUpdate();
 
-addWorkflows(document.querySelector("#workflow"));
+addWorkflows(workflow);
+
+const measurements = new Map([
+  [projectList, ["width", document.querySelector("#project-width")]],
+  [workflow, ["width", document.querySelector("#workflow-width")]],
+]);
+const frameHeight = document.querySelector("#frame-height");
+if (frameHeight) measurements.set(frameHeight.closest(".case-media"), ["height", frameHeight]);
+
+const sizes = new ResizeObserver(entries => {
+  for (const { target } of entries) {
+    const [axis, measure] = measurements.get(target);
+    measure.firstElementChild.textContent = axis + " / " + Math.round(target.getBoundingClientRect()[axis]) + " px";
+    measure.hidden = false;
+  }
+});
+for (const target of measurements.keys()) sizes.observe(target, { box: "border-box" });
+
+const typeLabel = document.querySelector(".case-type");
+if (typeLabel) {
+  const title = typeLabel.parentElement.querySelector("h3");
+  const typeSize = new ResizeObserver(() => {
+    typeLabel.textContent = "Title / " + getComputedStyle(title).fontSize.replace(/px$/, " px");
+    typeLabel.hidden = false;
+  });
+  typeSize.observe(title);
+}
+
+const gridRulers = document.querySelectorAll(".work-grid-ruler");
+const gridStep = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--grid-step"));
+function alignGridRulers() {
+  for (const ruler of gridRulers) {
+    // Start at the next row of the page grid, even when the section moves.
+    const sectionTop = ruler.parentElement.getBoundingClientRect().top + window.scrollY;
+    const offset = Math.ceil(sectionTop / gridStep) * gridStep - sectionTop;
+    ruler.style.setProperty("--grid-origin", offset + "px");
+  }
+}
+const pageSize = new ResizeObserver(alignGridRulers);
+pageSize.observe(document.querySelector(".work"));
+pageSize.observe(document.querySelector(".header"));

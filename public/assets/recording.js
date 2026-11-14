@@ -1,4 +1,4 @@
-import { videoDirectory } from "./media.js";
+import { publishedVideoDirectory, videoDirectory } from "./media.js";
 
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const recordings = new Map();
@@ -21,24 +21,25 @@ function chooseRecording() {
     }
   }
   if (next === active) return;
-  active?.video.pause();
+  active?.pause();
   active = next;
   if (active && !active.failed) {
     active.load();
-    if (!reducedMotion.matches && !active.userPaused && !active.video.ended) active.play();
+    if (!reducedMotion.matches && !active.userPaused) active.play();
   }
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) active?.video.pause();
-  else {
-    active = undefined;
-    chooseRecording();
+  if (document.hidden) {
+    active?.pause();
+    return;
   }
+  chooseRecording();
+  if (!reducedMotion.matches && active && !active.userPaused) active.play();
 });
 reducedMotion.addEventListener("change", () => {
-  if (reducedMotion.matches) active?.video.pause();
-  else if (active && !active.userPaused && !active.failed && !active.video.ended) active.play();
+  if (reducedMotion.matches) active?.pause();
+  else if (active && !active.userPaused) active.play();
 });
 
 function timecode(seconds) {
@@ -50,54 +51,83 @@ export function addRecording(figure, project) {
   figure.setAttribute("aria-label", project.title + " recording");
   figure.innerHTML = `
     <div class="media-stage">
-      <video playsinline muted preload="none" tabindex="-1" disablepictureinpicture></video>
-      <div class="media-cover" hidden>
-        <span class="media-loading" aria-hidden="true"></span>
-        <p hidden></p>
+      <video playsinline muted loop preload="none" tabindex="-1" disablepictureinpicture></video>
+      <div class="media-cover" data-signal="standby">
+        <div class="media-scope" aria-hidden="true"><i></i></div>
+        <p class="media-message">Stand by</p>
         <button class="action" type="button" hidden>Retry video</button>
       </div>
     </div>
-    <div class="controls" hidden>
+    <div class="controls">
       <button class="play" type="button" aria-label="Play">Play</button>
-      <input class="seek" type="range" min="0" max="1" step="0.1" value="0" aria-label="Seek through the recording">
-      <output aria-hidden="true">0:00 / 0:00</output>
-      <button class="fullscreen" type="button">Full screen</button>
+      <input class="seek" type="range" min="0" max="1" step="0.1" value="0" aria-label="Seek through the recording" disabled>
+      <output aria-hidden="true">0:00 / –:––</output>
+      <button class="fullscreen" type="button" disabled>Full screen</button>
     </div>`;
 
   const video = figure.querySelector("video");
   const stage = figure.querySelector(".media-stage");
   const cover = figure.querySelector(".media-cover");
-  const loader = cover.querySelector(".media-loading");
   const retry = cover.querySelector("button");
-  const feedback = cover.querySelector("p");
-  const controls = figure.querySelector(".controls");
-  const play = controls.querySelector(".play");
-  const seek = controls.querySelector(".seek");
-  const output = controls.querySelector("output");
-  const fullscreen = controls.querySelector(".fullscreen");
+  const message = cover.querySelector(".media-message");
+  const play = figure.querySelector(".play");
+  const seek = figure.querySelector(".seek");
+  const output = figure.querySelector("output");
+  const fullscreen = figure.querySelector(".fullscreen");
   const covered = [];
-  let focusOnLoad = false;
+  let wantsPlayback = false;
+  let buffering;
   const touchScreen = matchMedia("(any-pointer: coarse)");
   let landscapeLocked = false;
+  const filename = encodeURIComponent(project.video);
+
+  function showSignal(state, text) {
+    cover.dataset.signal = state;
+    cover.hidden = false;
+    message.textContent = text;
+    retry.hidden = state !== "unavailable";
+  }
+
+  function showFrame() {
+    clearTimeout(buffering);
+    if (!player.failed && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) cover.hidden = true;
+  }
+
+  function setSource(source) {
+    seek.disabled = true;
+    seek.value = "0";
+    seek.removeAttribute("aria-valuetext");
+    output.textContent = "0:00 / –:––";
+    fullscreen.disabled = true;
+    showSignal("tuning", "Tuning in…");
+    video.src = source;
+  }
 
   const player = {
-    figure, video, visibility: 0, failed: false, userPaused: false,
+    figure, visibility: 0, failed: false, userPaused: false,
     load() {
       if (video.hasAttribute("src") && !player.failed) return;
       player.failed = false;
-      cover.hidden = false;
-      loader.hidden = false;
-      feedback.hidden = true;
-      retry.hidden = true;
       video.preload = reducedMotion.matches ? "metadata" : "auto";
-      video.src = videoDirectory + encodeURIComponent(project.video);
+      setSource(videoDirectory + filename);
     },
     play() {
       if (active !== player || player.failed || document.hidden) return;
+      wantsPlayback = true;
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) showSignal("tuning", "Tuning in…");
       video.muted = true;
       video.play().catch(error => {
-        if (error.name === "NotAllowedError" && !player.failed) controls.hidden = false;
+        if (error.name !== "NotAllowedError" || !wantsPlayback || player.failed) return;
+        wantsPlayback = false;
+        playLabel("Play");
+        if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) showSignal("standby", "Press Play to tune in");
       });
+    },
+    pause() {
+      wantsPlayback = false;
+      video.pause();
+      showFrame();
+      if (!player.failed && video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) showSignal("standby", "Press Play to tune in");
     }
   };
 
@@ -144,49 +174,64 @@ export function addRecording(figure, project) {
     output.textContent = timecode(video.currentTime) + " / " + timecode(video.duration);
   }
 
-  retry.addEventListener("click", () => {
-    focusOnLoad = true;
-    player.load();
-    if (active && active !== player) active.video.pause();
+  function playManually() {
+    if (active !== player) active?.pause();
     active = player;
     player.userPaused = false;
+    player.load();
     player.play();
+  }
+
+  retry.addEventListener("click", () => {
+    playManually();
+    play.focus({ preventScroll: true });
   });
   video.addEventListener("loadedmetadata", () => {
-    cover.hidden = true;
-    controls.hidden = false;
+    seek.disabled = !Number.isFinite(video.duration) || video.duration <= 0;
+    fullscreen.disabled = false;
     updatePosition();
-    if (focusOnLoad) play.focus({ preventScroll: true });
-    focusOnLoad = false;
+    if (video.paused && !wantsPlayback) showSignal("standby", "Press Play to tune in");
+  });
+  for (const event of ["loadeddata", "canplay", "playing", "seeked"]) video.addEventListener(event, showFrame);
+  video.addEventListener("waiting", () => {
+    if (!cover.hidden || video.paused) return;
+    clearTimeout(buffering);
+    buffering = setTimeout(() => {
+      if (!player.failed && !video.paused && video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+        showSignal("tuning", "Tuning in…");
+      }
+    }, 300);
   });
   video.addEventListener("timeupdate", updatePosition);
   video.addEventListener("volumechange", () => { video.muted = true; });
   video.addEventListener("error", () => {
+    if (videoDirectory !== publishedVideoDirectory && video.getAttribute("src") === videoDirectory + filename) {
+      setSource(publishedVideoDirectory + filename);
+      if (wantsPlayback) player.play();
+      return;
+    }
+    const shouldFocus = figure.contains(document.activeElement);
     player.failed = true;
+    wantsPlayback = false;
+    clearTimeout(buffering);
     if (figure.classList.contains("expanded")) collapse();
     if (document.fullscreenElement === figure) document.exitFullscreen().catch(() => {});
-    const shouldFocus = focusOnLoad || figure.contains(document.activeElement);
-    controls.hidden = true;
-    cover.hidden = false;
-    loader.hidden = true;
-    feedback.textContent = "Recording unavailable.";
-    feedback.hidden = false;
-    retry.hidden = false;
+    seek.disabled = true;
+    fullscreen.disabled = true;
+    playLabel("Play");
+    showSignal("unavailable", "Recording unavailable");
     if (shouldFocus) retry.focus({ preventScroll: true });
-    focusOnLoad = false;
   });
   video.addEventListener("play", () => playLabel("Pause"));
-  video.addEventListener("pause", () => playLabel(video.ended ? "Replay" : "Play"));
-  video.addEventListener("ended", () => playLabel("Replay"));
+  video.addEventListener("pause", () => {
+    playLabel("Play");
+    showFrame();
+  });
 
   play.addEventListener("click", () => {
     player.userPaused = !video.paused;
-    if (player.userPaused) video.pause();
-    else {
-      if (active && active !== player) active.video.pause();
-      active = player;
-      player.play();
-    }
+    if (player.userPaused) player.pause();
+    else playManually();
   });
   video.addEventListener("click", () => play.click());
   seek.addEventListener("input", () => { video.currentTime = Number(seek.value); });

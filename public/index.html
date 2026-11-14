@@ -2,20 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Saul Deeson. Games publishing, player-facing experiences and production tools.">
   <meta name="theme-color" content="#eae6d8">
   <title>Saul Deeson</title>
   <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/deck.css">
+  <noscript><style>.deck-arrival { display: none; }</style></noscript>
+  <script type="module" src="/assets/deck.js"></script>
 </head>
-<body>
+<body class="deck-page">
+  <div class="deck-arrival" aria-hidden="true">
+    <img src="/assets/deck/planet.webp"
+      srcset="/assets/deck/planet-small.webp 880w, /assets/deck/planet.webp 1536w"
+      sizes="112vw" width="1536" height="1024" alt="" fetchpriority="high">
+  </div>
   <a class="skip" href="#main">Skip to content</a>
   <header class="top">
-    <div class="wrap header">
-      <a class="identity" href="/" aria-current="page">
-        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Saul Deeson
-      </a>
+    <div class="header">
+      <a class="identity" href="/" aria-current="page">Saul Deeson</a>
       <nav class="top-links" aria-label="Main navigation">
         <a href="/work/">Work</a>
         <a href="https://www.linkedin.com/in/sauldeeson/">LinkedIn</a>
@@ -23,29 +29,92 @@
       </nav>
     </div>
   </header>
-  <main id="main" class="wrap home">
-    <section class="surface home-hero" aria-labelledby="name">
-      <div class="hero-copy">
-        <p class="label">Games publishing &amp; technical production</p>
-        <h1 id="name">Saul Deeson</h1>
-        <p class="lede">I build interactive pages for games and develop tools that help publishing teams get their work ready for release.</p>
-        <a class="action primary" href="/work/">Explore my work <span aria-hidden="true">↗</span></a>
+  <main id="main">
+    <section class="observation-deck" aria-labelledby="name">
+      <div class="deck-scene" id="deck-scene">
+        <div class="deck-space" aria-hidden="true">
+          <img class="deck-planet" src="/assets/deck/planet.webp"
+            srcset="/assets/deck/planet-small.webp 880w, /assets/deck/planet.webp 1536w"
+            sizes="112vw" width="1536" height="1024" alt="" fetchpriority="high">
+          <div class="deck-stars">
+            <div class="deck-starfield">
+              <i style="--x:21%; --y:19%; --phase:-5.3s"></i>
+              <i style="--x:28%; --y:13%; --phase:-2s"></i>
+              <i style="--x:33%; --y:24%; --phase:-.8s"></i>
+              <i style="--x:38%; --y:17%; --phase:-4.2s"></i>
+              <i style="--x:43%; --y:22%; --phase:-3s"></i>
+              <i style="--x:47%; --y:12%; --phase:-5.8s"></i>
+              <i style="--x:51%; --y:17.5%; --phase:-.4s"></i>
+              <i style="--x:56%; --y:21%; --phase:-6.1s"></i>
+              <i style="--x:60%; --y:14%; --phase:-3.5s"></i>
+              <i style="--x:65%; --y:18%; --phase:-1.6s"></i>
+              <i style="--x:71%; --y:23%; --phase:-4.7s"></i>
+              <i style="--x:76%; --y:15%; --phase:-5.5s"></i>
+              <i style="--x:84%; --y:19%; --phase:-1.9s"></i>
+              <i style="--x:19%; --y:31%; --phase:-2.3s"></i>
+              <i style="--x:50%; --y:35%; --phase:-2.9s"></i>
+              <i style="--x:62%; --y:28%; --phase:-.5s"></i>
+              <i style="--x:34%; --y:57%; --phase:-4s"></i>
+              <i style="--x:42%; --y:50%; --phase:-6.3s"></i>
+              <i style="--x:48%; --y:59%; --phase:-.2s"></i>
+              <i style="--x:53%; --y:54%; --phase:-2.2s"></i>
+              <i style="--x:59%; --y:57%; --phase:-3.8s"></i>
+              <i style="--x:65%; --y:51%; --phase:-2.7s"></i>
+              <i style="--x:73%; --y:50%; --phase:-1.3s"></i>
+              <i style="--x:81%; --y:46%; --phase:-5s"></i>
+            </div>
+          </div>
+          <div class="deck-traffic">
+            <span class="deck-ship"></span><span class="deck-ship"></span><span class="deck-ship"></span>
+          </div>
+        </div>
+        <div class="deck-shade" aria-hidden="true"></div>
+        <div class="deck-supports" aria-hidden="true"></div>
+        <div class="deck-placard" id="deck-beam">
+          <img class="deck-gantry" src="/assets/deck/beam.webp" width="2172" height="724" alt="" fetchpriority="high">
+          <span class="deck-light deck-beam-glow" aria-hidden="true"></span>
+          <p class="deck-role">Games publishing &amp; technical production</p>
+          <h1 id="name">Saul Deeson</h1>
+          <span class="deck-socket" aria-hidden="true"></span>
+          <span class="deck-beam-spec spec-label" aria-hidden="true"><i class="register"></i><i class="hatch"></i><span>Ø 12 PX</span></span>
+          <span class="deck-angle spec-label" aria-hidden="true">
+            <span class="deck-engraving">+3°</span>
+            <svg width="52" height="14" viewBox="0 0 52 14" focusable="false">
+              <path class="deck-angle-datum" d="M1 10h50"/>
+              <path class="deck-angle-rise" d="M1 10h50"/>
+              <path d="M51 6v5"/>
+            </svg>
+          </span>
+        </div>
+        <div class="deck-intro">
+          <p>I build interactive pages for games and develop tools that help publishing teams get their work ready for release.</p>
+          <a class="action primary" href="/work/">Explore my work <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="deck-railing">
+          <img src="/assets/deck/lit-railing.webp"
+            srcset="/assets/deck/lit-railing-small.webp 1086w, /assets/deck/lit-railing.webp 2172w"
+            sizes="100vw" width="2172" height="278" alt="">
+          <span class="deck-light deck-lamp-shade" aria-hidden="true"></span>
+          <button class="deck-light-trigger" type="button" aria-label="Flicker railing light" hidden></button>
+        </div>
+        <p class="deck-span spec-label" hidden aria-hidden="true"><span class="deck-engraving">Span / <b id="deck-span"></b></span></p>
       </div>
+
+      <nav class="deck-routes" aria-label="Explore my work">
+        <a href="/work/#selected-work" data-deck-route="players">Player-facing experiences <span aria-hidden="true">↗</span></a>
+        <a href="/work/#tools" data-deck-route="tools">Behind the release <span aria-hidden="true">↗</span></a>
+        <span class="deck-sill-datum spec-label" aria-hidden="true"><i class="register"></i> Datum B</span>
+      </nav>
+
+      <svg class="deck-traces" aria-hidden="true" focusable="false">
+        <path class="trace-trunk"></path>
+        <path class="trace-players"></path>
+        <path class="trace-tools"></path>
+        <circle class="trace-players" r="2.1"></circle>
+        <circle class="trace-tools" r="2.1"></circle>
+      </svg>
     </section>
-    <nav class="home-work surface" aria-label="Explore my work">
-      <a href="/work/#selected-work">
-        <span class="label">Selected work</span>
-        <strong>Player-facing experiences</strong>
-        <span>Explore the pages I built for game updates, seasonal events and campaigns, with recordings and notes on how they work.</span>
-        <span class="home-arrow" aria-hidden="true">↗</span>
-      </a>
-      <a href="/work/#tools">
-        <span class="label">Tools &amp; automation</span>
-        <strong>Behind the release</strong>
-        <span>Try examples of the publishing and planning tools I built to make the team’s day-to-day work easier.</span>
-        <span class="home-arrow" aria-hidden="true">↗</span>
-      </a>
-    </nav>
+    <div class="deck-footing" aria-hidden="true"><span class="spec-label"><i class="hatch"></i> R 4 PX</span></div>
   </main>
   <footer class="footer">
     <div class="wrap footer-inner">

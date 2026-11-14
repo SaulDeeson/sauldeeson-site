@@ -1,0 +1,597 @@
+.deck-page {
+  --planet-grade: brightness(.84) saturate(.76) contrast(1.05);
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: #1c201e;
+}
+.deck-page main { flex: 1; display: flex; flex-direction: column; }
+.deck-page .footer {
+  color: #e1d6bd;
+  border-color: #66665a;
+  background:
+    linear-gradient(180deg, #11161263, #161b17b5),
+    url("/assets/deck/beam.webp") center / 100% 100%,
+    #222622;
+}
+.deck-page .footer a:hover { color: #ffd29b; }
+.deck-page .footer :focus-visible { outline-color: #ffd29b; }
+
+.observation-deck {
+  --deck-ink: #e9dcc1;
+  --ivory-paint: url("/assets/deck/ivory-paint.webp");
+  --deck-gutter: clamp(37px, 9vw, 225px);
+  --beam-angle: -3deg;
+  --beam-offset: calc(clamp(25px, 2.2vw, 48px) + 2.62vw);
+  --gantry-depth: clamp(188px, min(20.4vw, 30svh), 460px);
+  --rail-depth: clamp(89px, min(10.5vw, 14.4svh), 190px);
+  --space-depth: clamp(169px, min(14.5vw, 26svh), 250px);
+  --route-size: clamp(86px, min(8.65vw, 13svh), 146px);
+  --name-size: clamp(2.9rem, min(13.4vw, 24.2svh), 21.5rem);
+  position: relative;
+  isolation: isolate;
+}
+.deck-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(var(--beam-offset) + var(--gantry-depth) + var(--space-depth) + var(--rail-depth));
+  padding: var(--beam-offset) 0 calc(var(--rail-depth) + 8px);
+  background: #0c1213;
+  color: var(--deck-ink);
+}
+.deck-space, .deck-shade, .deck-supports {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.deck-space, .deck-railing { overflow: hidden; }
+.deck-space {
+  --pan-x: clamp(40px, 3.4vw, 92px);
+  --pan-y: clamp(41px, 5.6svh, 84px);
+  --planet-x-position: 50%;
+  --planet-y-position: 48%;
+}
+.deck-planet, .deck-stars {
+  position: absolute;
+  width: calc(100% + 2 * var(--pan-x));
+  height: calc(100% + 2 * var(--pan-y));
+  inset: calc(-1 * var(--pan-y)) auto auto calc(-1 * var(--pan-x));
+  transform: translate(var(--planet-x, 0px), var(--planet-y, 0px));
+}
+.deck-planet {
+  max-width: none;
+  object-fit: cover;
+  object-position: var(--planet-x-position) var(--planet-y-position);
+  filter: var(--planet-grade);
+}
+.deck-stars { container-type: size; }
+.deck-starfield {
+  /* Match the planet image's 3:2 cover crop to keep the stars in its sky. */
+  position: absolute;
+  width: max(100cqw, 150cqh);
+  height: max(100cqh, calc(100cqw / 1.5));
+  top: var(--planet-y-position);
+  left: var(--planet-x-position);
+  transform: translate(calc(-1 * var(--planet-x-position)), calc(-1 * var(--planet-y-position)));
+}
+.deck-starfield i {
+  --star-light: .19;
+  --twinkle-period: 8.3s;
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: 1px;
+  height: 1px;
+  border-radius: 50%;
+  background: #d7e2e3;
+  opacity: var(--star-light);
+}
+.deck-starfield i:nth-child(3n + 1) { --star-light: .27; --twinkle-period: 11.5s; }
+.deck-starfield i:nth-child(5n + 1) {
+  --star-light: .33;
+  --twinkle-period: 6.8s;
+  width: 1.65px;
+  height: 1.65px;
+  background: #e7e1cc;
+  box-shadow: 0 0 2.5px #b7d0dc70;
+}
+.deck-shade {
+  background:
+    linear-gradient(90deg, #0a1113ed 5%, #0a1113c2 28%, #0a111338 62%, #0a111306 93%),
+    linear-gradient(0deg, #0b121561 0%, transparent 54%);
+}
+.deck-traffic {
+  position: absolute;
+  inset: 0;
+  transform: translate(var(--traffic-x, 0px), var(--traffic-y, 0px));
+}
+.deck-ship {
+  position: absolute;
+  left: 72%;
+  bottom: calc(var(--rail-depth) + clamp(91px, 7.4vw, 200px));
+  width: clamp(10px, 1vw, 20px);
+  height: clamp(4px, .35vw, 7px);
+  opacity: 0;
+  filter: drop-shadow(0 1px 1px #050a0c);
+}
+.deck-ship::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 63%, 31% 39%, 47% 0, 59% 0, 68% 39%, 100% 57%, 76% 82%, 63% 83%, 54% 100%, 43% 96%, 35% 79%, 13% 92%);
+  background: linear-gradient(162deg, #d8d9c0 20%, #899b93 37%, #475d5d 66%, #19292c 67%);
+}
+.deck-ship::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  top: 60%;
+  width: 2px;
+  height: 1px;
+  background: #f6c88b;
+  box-shadow: 0 0 4px 1px #eeb9878a;
+}
+.deck-ship:nth-child(2) {
+  left: 69%;
+  bottom: calc(var(--rail-depth) + clamp(56px, 5.7vw, 128px));
+  width: clamp(8px, .71vw, 15px);
+  height: 4px;
+}
+.deck-ship:nth-child(3) {
+  left: 81%;
+  bottom: calc(var(--rail-depth) + clamp(82px, 6.25vw, 150px));
+  width: clamp(9px, .8vw, 17px);
+  height: 5px;
+}
+.deck-supports {
+  --brace-depth: calc(var(--beam-offset) + 4.2vw);
+  bottom: calc(var(--rail-depth) * .3);
+  background:
+    url("/assets/deck/brace-left.webp") left top / 17% var(--brace-depth) no-repeat,
+    url("/assets/deck/brace-right.webp") right top / 17% calc(var(--brace-depth) * .73) no-repeat,
+    url("/assets/deck/upright-left.webp") left / 3.85% 100% no-repeat,
+    url("/assets/deck/upright-right.webp") right / 3.85% 100% no-repeat;
+  filter: brightness(.68) saturate(.68);
+}
+.deck-placard {
+  --socket-size: 12px;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(7px, .85vw, 21px);
+  min-height: var(--gantry-depth);
+  margin-inline: -1px;
+  padding: clamp(18px, 2.1vw, 43px) var(--deck-gutter) clamp(23px, 2.35vw, 50px);
+  transform: skewY(var(--beam-angle));
+  background: #222623;
+  box-shadow: 0 -1px 4px #060a0794, 0 7px 12px #030607a6;
+}
+.deck-gantry {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.deck-light {
+  position: absolute;
+  pointer-events: none;
+  opacity: var(--steady-light);
+}
+.deck-beam-glow {
+  --steady-light: .84;
+  --low-light: .21;
+  z-index: -1;
+  inset: auto 0 1.2% 58%;
+  height: 10%;
+  background: radial-gradient(ellipse at 105% 80%, #e29a5f76, #aa623b37 54%, transparent 80%);
+  mix-blend-mode: screen;
+}
+.deck-light-trigger {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  width: clamp(64px, 22.1%, 100%);
+  padding: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.deck-light-trigger:focus-visible { outline: 1px solid #e2bc8a; outline-offset: -4px; }
+.deck-role {
+  color: #ddcdb0;
+  font-size: clamp(.92rem, min(1.94vw, 3.45svh), 2.16rem);
+  font-weight: 680;
+  line-height: 1.21;
+  text-shadow: 0 1px 1px #080a08ad;
+}
+.deck-placard h1 {
+  font: 790 var(--name-size)/.97 var(--sans);
+  font-variation-settings: "opsz" 24;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  text-wrap: initial;
+  color: #e6d6b9;
+}
+@supports (background-clip: text) {
+  .deck-placard h1 {
+    background:
+      linear-gradient(106deg, #ffecd139 0%, #ffeacf26 27%, transparent 55%, #1c211f39 100%),
+      var(--ivory-paint) center / 100% auto,
+      #d4c0a1;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(.35px 1px .15px #080b08b3);
+  }
+}
+.deck-socket {
+  position: absolute;
+  z-index: 3;
+  left: 49%;
+  bottom: -1px;
+  width: var(--socket-size);
+  height: var(--socket-size);
+  transform: translateX(-50%);
+  border: 1px solid #878a7a;
+  border-radius: 50%;
+  background: radial-gradient(circle, #161b17 29%, #666b60 32%, #333832 62%, #171c19 65%);
+  box-shadow: 1px 2px 3px #060b08c0;
+}
+.deck-beam-spec {
+  position: absolute;
+  right: max(15px, 1.85vw);
+  top: 21%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  color: #cfbea2;
+}
+.deck-beam-spec span { writing-mode: vertical-rl; }
+.deck-beam-spec .hatch { width: 11px; height: clamp(29px, 3.2vw, 54px); }
+.deck-beam-spec .register { flex: none; }
+.deck-angle {
+  position: absolute;
+  z-index: 1;
+  left: max(11px, 1.3vw);
+  bottom: clamp(24px, 3vw, 60px);
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  width: 52px;
+  color: #ac9878;
+  font-size: clamp(.63rem, .72vw, .83rem);
+  pointer-events: none;
+  transform: skewY(calc(-1 * var(--beam-angle)));
+}
+.deck-angle svg { fill: none; stroke: currentColor; stroke-width: .85; }
+.deck-angle-datum { stroke-dasharray: 2.6 2; opacity: .7; }
+.deck-angle-rise { transform: skewY(var(--beam-angle)); transform-origin: 1px 10px; }
+.deck-span {
+  position: absolute;
+  z-index: 1;
+  bottom: calc(var(--rail-depth) + 30px);
+  left: max(8px, 1.1vw);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b3a082;
+  font-size: clamp(.66rem, .77vw, .86rem);
+  text-shadow: 0 1px 2px #040907;
+  pointer-events: none;
+}
+.deck-span::before {
+  content: "";
+  width: 10px;
+  height: clamp(79px, 8vw, 120px);
+  border-block: 1px solid #b4a1838c;
+  background: linear-gradient(#b4a1838c, #b4a1838c) center / 1px 100% no-repeat;
+}
+.deck-span .deck-engraving { writing-mode: vertical-rl; rotate: 180deg; }
+.deck-span b { font-weight: inherit; }
+@supports (background-clip: text) {
+  .deck-engraving {
+    background:
+      linear-gradient(135deg, #201f195c, #1617133b),
+      var(--ivory-paint) 19% 41% / 190px auto,
+      #d7c19b;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    opacity: .85;
+    filter: drop-shadow(0 1px 1px #040907);
+  }
+}
+
+.deck-intro {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  max-width: 100%;
+  padding: calc(2.1vw + 14px) 0 5px var(--deck-gutter);
+}
+.deck-intro p {
+  max-width: min(36ch, 38vw);
+  font-size: clamp(1rem, min(1.77vw, 2.65svh), 1.72rem);
+  line-height: 1.42;
+  color: #f1e7d2;
+  text-shadow: 0 1px 4px #050808b0;
+}
+.deck-intro .action {
+  min-height: clamp(44px, 4.15vw, 55px);
+  margin-top: clamp(13px, min(1.5vw, 2.4svh), 25px);
+  padding-inline: clamp(13px, 1.6vw, 23px);
+  gap: .8em;
+  color: #fff9ed;
+  font: 650 clamp(.85rem, 1.15vw, 1.08rem)/1.25 var(--sans);
+  letter-spacing: normal;
+  text-transform: none;
+  box-shadow: 0 2px 4px #0003;
+}
+.deck-intro .action:focus-visible { outline-color: #f3d5a9; }
+.deck-railing {
+  position: absolute;
+  pointer-events: none;
+  inset: auto 0 0;
+  height: var(--rail-depth);
+}
+.deck-railing img { display: block; width: 100%; height: 100%; }
+.deck-lamp-shade {
+  inset: 0;
+  background:
+    linear-gradient(#170d08e8, #170d08e8) right 0 top 5.1% / 22.1% 3.85% no-repeat,
+    radial-gradient(ellipse 24% 19% at 88% 82%, #1e1007d1 18%, transparent 100%);
+  mask: url("/assets/deck/lit-railing-small.webp") center / 100% 100%;
+  --steady-light: 0;
+  --low-light: .77;
+}
+.deck-routes {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr));
+  min-height: var(--route-size);
+  border-bottom: 1px solid #a2957f;
+  background:
+    linear-gradient(97deg, #352d2514, transparent 38%, #352d2529),
+    url("/assets/deck/sill.webp") center / 100% 100%,
+    #e0d3bc;
+}
+.deck-routes a {
+  padding: clamp(18px, calc(2.8vw - 6px), 41px) clamp(22px, 5vw, 76px) 23px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55em;
+  color: #252b28;
+  font-size: clamp(1rem, 1.84vw, 1.85rem);
+  font-weight: 720;
+  line-height: 1.2;
+  transition: color .2s, background-color .2s;
+}
+.deck-routes a + a { border-left: 1px solid #675e4840; }
+.deck-routes a:is(:hover, :focus-visible) { background-color: #f6efd857; color: #244b5a; }
+.deck-routes a:focus-visible { outline-offset: -6px; }
+.deck-routes a span { transition: translate .2s; }
+.deck-routes a:is(:hover, :focus-visible) span { translate: 2px -2px; }
+.deck-sill-datum {
+  position: absolute;
+  right: 5px;
+  bottom: 23px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 3px;
+  color: #4f5349;
+  border-top: 1px solid currentColor;
+  rotate: -39deg;
+  pointer-events: none;
+}
+.deck-sill-datum .register { width: 9px; height: 9px; }
+.deck-traces {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.deck-traces:not(.is-drawn) { visibility: hidden; }
+.deck-traces :is(path, circle) {
+  fill: none;
+  stroke: #dacdb1;
+  stroke-width: 1.9px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 1px #0b110fd4);
+  transition: stroke .22s, opacity .22s, filter .22s;
+}
+.deck-traces circle { fill: #4b483d; stroke-width: 1.25px; }
+.observation-deck:has([data-deck-route="players"]:is(:hover, :focus-visible)) :is(.trace-players, .trace-trunk),
+.observation-deck:has([data-deck-route="tools"]:is(:hover, :focus-visible)) :is(.trace-tools, .trace-trunk) {
+  stroke: #ffd7a0;
+  filter: drop-shadow(0 0 3px #ffa957c4) drop-shadow(0 1px 1px #0b110fb5);
+}
+.observation-deck:has([data-deck-route="players"]:is(:hover, :focus-visible)) .trace-tools,
+.observation-deck:has([data-deck-route="tools"]:is(:hover, :focus-visible)) .trace-players { opacity: .55; }
+
+.deck-footing {
+  position: relative;
+  flex: 1;
+  min-height: clamp(53px, 6vw, 98px);
+  border-top: 1px solid #171a16;
+  background:
+    linear-gradient(174deg, #161c1840, #1a201bc7),
+    url("/assets/deck/beam.webp") center / 100% 100%,
+    #282a24;
+  box-shadow: inset 0 4px 7px #070a09b0, inset 0 -1px #090d0c;
+}
+.deck-footing::before {
+  content: "";
+  position: absolute;
+  top: clamp(24px, 3.4vw, 50px);
+  inset-inline: 2%;
+  height: 1px;
+  background: linear-gradient(90deg, #a39c7b48, #817d6522 35%, #817d655e 78%, #a39c7b38);
+  box-shadow: 0 1px #0a0e0cbe;
+}
+.deck-footing > span {
+  position: absolute;
+  bottom: 12px;
+  right: clamp(15px, 4vw, 75px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #bdaf92;
+  font-size: .64rem;
+}
+.deck-footing .hatch {
+  display: block;
+  width: 41px;
+  height: 11px;
+  border: 1px solid #7d7a65;
+  border-radius: 4px;
+  background-color: #111714;
+  color: #8c8668;
+}
+
+.deck-arrival {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+  background: #121b1a;
+}
+.deck-arrival:not([data-ready]) {
+  animation: arrival-fallback 1.6s linear forwards;
+}
+@keyframes arrival-fallback {
+  0%, 55% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+.deck-arrival img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 76%;
+  transform: scale(1.37);
+  transform-origin: 65% 72%;
+  filter: var(--planet-grade);
+}
+
+.observation-deck[data-motion] .deck-light { animation: lamp-flicker 24s linear 2s infinite; }
+.observation-deck.is-flickering .deck-light { animation: lamp-triggered .62s linear; }
+.observation-deck[data-motion] .deck-starfield i { animation: star-twinkle var(--twinkle-period) ease-in-out var(--phase) infinite; }
+.observation-deck[data-motion] .deck-ship { animation: ship-pass 8s linear 2.5s infinite; }
+.observation-deck[data-motion] .deck-ship:nth-child(2) { animation: ship-pass 10.7s linear 4.1s infinite reverse; }
+.observation-deck[data-motion] .deck-ship:nth-child(3) { animation: ship-pass 13.1s linear 6.3s infinite; }
+.observation-deck[data-motion="paused"] :is(.deck-light, .deck-ship, .deck-starfield i) { animation-play-state: paused; }
+@keyframes lamp-flicker {
+  0%, 10.5%, 13.3%, 100% { opacity: var(--steady-light); }
+  11.25%, 12.5% { opacity: var(--low-light); }
+  11.95% { opacity: calc((var(--low-light) + var(--steady-light)) / 2); }
+}
+@keyframes lamp-triggered {
+  0%, 100% { opacity: var(--steady-light); }
+  22%, 62% { opacity: var(--low-light); }
+  45% { opacity: calc((var(--low-light) + var(--steady-light)) / 2); }
+}
+@keyframes star-twinkle {
+  0%, 63%, 100% { opacity: var(--star-light); }
+  18% { opacity: calc(var(--star-light) * .56); }
+  38% { opacity: calc(var(--star-light) * 1.5); }
+}
+@keyframes ship-pass {
+  0% { opacity: 0; transform: translate(-5vw, 12px) rotate(-7deg); }
+  11% { opacity: .75; }
+  43% { opacity: .6; }
+  68%, 100% { opacity: 0; transform: translate(11vw, -15px) rotate(-7deg); }
+}
+
+@media (min-width: 761px) and (max-height: 900px) {
+  .observation-deck {
+    --beam-offset: calc(12px + 2.62vw);
+    --gantry-depth: clamp(173px, min(20vw, 27svh), 306px);
+    --rail-depth: clamp(74px, min(9.5vw, 11.3svh), 108px);
+    --space-depth: clamp(148px, 23svh, 190px);
+    --name-size: clamp(2.9rem, min(13.4vw, 23svh), 13rem);
+  }
+  .deck-placard { gap: clamp(8px, 1vw, 15px); padding-block: 11px 16px; }
+  .deck-intro { padding-top: calc(1.55vw + 9px); }
+  .deck-intro .action { min-height: 46px; }
+  .deck-span { bottom: calc(var(--rail-depth) + 13px); }
+  .deck-span::before { height: 76px; }
+}
+@media (max-width: 760px) {
+  .observation-deck {
+    --deck-gutter: 10vw;
+    --beam-offset: calc(22px + 2.62vw);
+    --gantry-depth: clamp(121px, 27vw, 205px);
+    --space-depth: 202px;
+    --rail-depth: clamp(69px, 16vw, 104px);
+    --name-size: clamp(1.95rem, 12.5vw, 5.7rem);
+    --route-size: 84px;
+  }
+  .deck-placard { gap: 5px; padding-block: 15px 18px; }
+  .deck-placard h1 { font-variation-settings: "opsz" 19; }
+  .deck-intro { padding-right: var(--deck-gutter); }
+  .deck-intro p { max-width: min(35ch, 100%); }
+  .deck-space { --planet-x-position: 73%; --planet-y-position: 57%; }
+  .deck-shade { background: linear-gradient(90deg, #0a1113d4, #0a111390 52%, #0a11132a); }
+  .deck-sill-datum, .deck-beam-spec, .deck-span { font-size: .56rem; letter-spacing: .06em; }
+  .deck-span { left: auto; right: 6px; bottom: calc(var(--rail-depth) + 20px); flex-direction: row-reverse; gap: 5px; }
+  .deck-span::before { width: 5px; height: 66px; }
+  .deck-beam-spec { right: 6px; gap: 4px; }
+  .deck-beam-spec .register { width: 9px; height: 9px; }
+  .deck-beam-spec .hatch { width: 7px; height: 22px; }
+  .deck-routes a { padding-inline: 16px; }
+  .deck-traces :is(path, circle) { stroke-width: 1.45px; }
+}
+@media (max-width: 830px) {
+  .deck-angle { display: none; }
+}
+@media (max-width: 569px) {
+  .deck-routes {
+    grid-template-columns: 1fr;
+    background-image: linear-gradient(93deg, transparent, #352d2519), url("/assets/deck/sill-mobile.webp");
+    background-size: cover;
+  }
+  .deck-routes a { justify-content: space-between; padding: 17px 12vw 19px; }
+  .deck-routes a + a { border-left: 0; border-top: 1px solid #675e4860; }
+  .deck-sill-datum { right: 0; bottom: 16px; }
+  .deck-socket { left: 5%; }
+}
+@media (max-width: 360px) {
+  .deck-role { font-size: .83rem; }
+  .deck-sill-datum { right: -1px; bottom: 15px; font-size: .48rem; }
+  .deck-routes a { padding-right: 15vw; }
+}
+@media (forced-colors: active) {
+  .deck-arrival { display: none; }
+  .deck-space, .deck-shade, .deck-supports, .deck-gantry, .deck-railing, .deck-sill-datum,
+  .deck-angle, .deck-span, .deck-beam-spec, .deck-socket, .deck-light-trigger, .deck-traces, .deck-footing { display: none; }
+  .deck-scene, .deck-routes, .deck-placard { background: Canvas; }
+  .deck-placard h1 { color: CanvasText; background: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-arrival { display: none; }
+  .deck-light-trigger { display: none; }
+  .observation-deck[data-motion] :is(.deck-light, .deck-ship, .deck-starfield i) { animation: none; }
+  .deck-planet, .deck-stars { transform: none; }
+}
