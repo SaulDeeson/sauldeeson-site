@@ -54,9 +54,38 @@ export const toolDescriptions = {
     "A publishing task moves from In Progress to For Review before it’s ready for Localization. An open review can hold up the project manager and the localisation team, especially when nobody knows who’s waiting on whom.",
     "I configured Jira rules to remind the reviewer when a decision was due and route the issue once they responded. A request for changes sends it back to In Progress. A completed review moves it to Localization, where the project manager coordinates the handoff."
   ],
+  "team-dashboards": [
+    "I configured dashboards in Jira, Targetprocess and Fibery to help teammates plan their day. I used the task fields and filters in each platform to build tables that brought together owners, priorities, due dates and subtasks. People could see what they were responsible for, what to pick up first and what completing a task involved.",
+    "I also set up calendar views so the team could see when work was due and plan around upcoming deadlines. The demo uses the same sample tasks in both views. Filter by assignee, then open a task to see the steps it contains."
+  ],
   "support-setup": [
     "A campaign is often accompanied by smaller promotional entries, such as portal cards and in-client placements in Wargaming Game Center. Setting up a batch meant taking campaign details from Confluence and localised titles from Excel, then entering them across several CMS panels. Each placement needed copy in around 20 languages, so five placements could mean 100 combinations of placement and language.",
     "I built a Chrome extension that brings both sources into one form. It matches the localised copy to each placement and flags missing fields before publication. The same batch can supply the event calendar, featured offer and banner on the portal, plus the hero and minor banners in Wargaming Game Center. A setup that took about 30 minutes now takes about 10, with less repeated data entry."
+  ]
+};
+
+export const dashboardSample = {
+  week: "14–18 September 2026",
+  days: [
+    { date: "2026-09-14", label: "Mon 14" },
+    { date: "2026-09-15", label: "Tue 15" },
+    { date: "2026-09-16", label: "Wed 16" },
+    { date: "2026-09-17", label: "Thu 17" },
+    { date: "2026-09-18", label: "Fri 18" }
+  ],
+  tasks: [
+    { id: "reward-qa", title: "Verify reward claims", assignee: "Editor A", day: 0, priority: "High",
+      steps: ["Test a claim on each article", "Check that the reward reaches the player’s account", "Check that each article awards a different item"] },
+    { id: "release-copy", title: "Review release copy", assignee: "Editor B", day: 1, priority: "High",
+      steps: ["Check feature details with the release team", "Resolve comments in the working copy", "Approve the source text for localisation"] },
+    { id: "handoff", title: "Hand off to localisation", assignee: "Project manager", day: 2, priority: "High",
+      steps: ["Confirm all source text is ready", "Share the copy and asset references", "Confirm the delivery dates with regional teams"] },
+    { id: "event-assets", title: "Prepare event assets", assignee: "Editor A", day: 1, priority: "Normal",
+      steps: ["Check crops for the portal and launcher", "Upload the final images to the CMS", "Preview the placements on desktop and mobile"] },
+    { id: "patch-previews", title: "Check micropatch drafts", assignee: "Editor B", day: 3, priority: "Normal",
+      steps: ["Review the draft in each regional CMS", "Check publication times and regional links", "Confirm all drafts are ready to schedule"] },
+    { id: "release-notes", title: "Record release follow-ups", assignee: "Project manager", day: 4, priority: "Low",
+      steps: ["Collect notes from the release team", "Record issues and assign follow-ups"] }
   ]
 };
 

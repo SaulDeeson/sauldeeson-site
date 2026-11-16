@@ -1,4 +1,4 @@
-import { portals, releaseEmail, sampleNotes, formatNotes, milestones, toolDescriptions, supportPlacements, languagesPerSupport } from "./workflow-data.js";
+import { portals, releaseEmail, sampleNotes, formatNotes, milestones, toolDescriptions, dashboardSample, supportPlacements, languagesPerSupport } from "./workflow-data.js";
 
 const motion = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -451,11 +451,107 @@ function addSupports(container) {
   draw(false);
 }
 
+function addDashboards(container) {
+  const { week, days, tasks } = dashboardSample;
+  const assignees = [...new Set(tasks.map(task => task.assignee))];
+  const priorities = ["High", "Normal", "Low"];
+  const orderedTasks = [...tasks].sort((a, b) => priorities.indexOf(a.priority) - priorities.indexOf(b.priority) || a.day - b.day);
+  const root = panel(container, "team-dashboards", "Team task dashboards", `
+    <div class="demo-toolbar">
+      <div class="demo-switches" role="group" aria-label="Dashboard view">
+        ${switchButton("dashboard", "table", "Table", true)}
+        ${switchButton("dashboard", "calendar", "Calendar")}
+      </div>
+      <label class="dashboard-filter">
+        <span class="label">Assignee</span>
+        <select class="board-button">
+          <option value="">Everyone</option>
+          ${assignees.map(assignee => `<option>${assignee}</option>`).join("")}
+        </select>
+      </label>
+    </div>
+    <div class="demo-board dashboard-board">
+      <p class="board-label dashboard-week">Sample week · ${week}</p>
+      <div class="dashboard-layout">
+        <div class="dashboard-view"></div>
+        <div class="dashboard-detail">
+          <h4 class="board-label">Task scope</h4>
+          <div aria-live="polite">
+            <p class="dashboard-detail-title"></p>
+            <p class="board-foot dashboard-detail-meta"></p>
+            <ul></ul>
+          </div>
+        </div>
+      </div>
+    </div>`);
+  root.classList.add("demo-wide");
+  const filter = root.querySelector(".dashboard-filter select");
+  const display = root.querySelector(".dashboard-view");
+  const detailTitle = root.querySelector(".dashboard-detail-title");
+  const detailMeta = root.querySelector(".dashboard-detail-meta");
+  const detailSteps = root.querySelector(".dashboard-detail ul");
+  let view = "table";
+  let selected = orderedTasks[0];
+
+  const dateLabel = ({ date, label }) => `<time datetime="${date}">${label}</time>`;
+  const priority = task => `<span class="dashboard-priority" data-priority="${task.priority}">${task.priority}</span>`;
+  const taskButton = task => `<button class="dashboard-task" type="button" value="${task.id}" aria-pressed="${task === selected}">${task.title}</button>`;
+
+  function showTask(task) {
+    selected = task;
+    for (const button of display.querySelectorAll(".dashboard-task")) {
+      button.setAttribute("aria-pressed", String(button.value === task.id));
+    }
+    detailTitle.textContent = task.title;
+    detailMeta.textContent = `${task.assignee} · ${task.priority} priority · ${days[task.day].label}`;
+    detailSteps.replaceChildren(...task.steps.map(step => {
+      const item = document.createElement("li");
+      item.textContent = step;
+      return item;
+    }));
+  }
+
+  function drawView() {
+    const visible = orderedTasks.filter(task => !filter.value || task.assignee === filter.value);
+    const active = visible.includes(selected) ? selected : visible[0];
+    if (view === "table") {
+      display.innerHTML = `
+        <table class="dashboard-table" aria-label="Tasks by priority">
+          <thead><tr><th scope="col">Task / assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead>
+          <tbody>${visible.map(task => `
+            <tr><td>${taskButton(task)}<span class="dashboard-owner">${task.assignee}</span></td>
+            <td>${priority(task)}</td><td>${dateLabel(days[task.day])}</td></tr>`).join("")}</tbody>
+        </table>`;
+    } else {
+      display.innerHTML = `
+        <div class="dashboard-calendar" role="group" aria-label="Tasks by due date">
+          ${days.map((day, index) => `
+            <div class="dashboard-day">
+              <p class="board-label">${dateLabel(day)}</p>
+              <div class="dashboard-events">${visible.filter(task => task.day === index).map(task => `
+                <div class="dashboard-event">${taskButton(task)}<span class="dashboard-owner">${task.assignee}</span>${priority(task)}</div>
+              `).join("") || '<span class="dashboard-owner">No tasks</span>'}</div>
+            </div>`).join("")}
+        </div>`;
+    }
+    showTask(active);
+  }
+
+  choices(root, "dashboard", value => { view = value; drawView(); });
+  filter.addEventListener("change", drawView);
+  display.addEventListener("click", event => {
+    const button = event.target.closest(".dashboard-task");
+    if (button) showTask(tasks.find(task => task.id === button.value));
+  });
+  drawView();
+}
+
 export function addWorkflows(container) {
   addTransfer(container);
   addMicropatch(container);
   addNotes(container);
   addMilestones(container);
   addJira(container);
+  addDashboards(container);
   addSupports(container);
 }

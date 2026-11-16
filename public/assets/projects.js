@@ -6,7 +6,7 @@ export const projects = [
     video: "wot-2-4.mp4",
     url: "https://worldoftanks.eu/en/news/updates/wot-2-4/",
     paragraphs: [
-      "I built a set of showcase pages to help players explore Update 2.4. Each article covered a different part of the release and included a button to claim an in-game reward. That gave players a reason to come back for the next article as the campaign rolled out.",
+      "The Update 2.4 showcase brought together articles covering different parts of the release. I built the reward feature that let players claim an in-game item from each article, giving them a reason to come back as the campaign rolled out.",
       "I connected the pages to a reward API. Each claim drew a random item from a shared pool and credited it to the player’s account. The draw excluded rewards that player had already received, so visiting another article meant getting something different."
     ]
   },
